@@ -1,19 +1,14 @@
-import { atom, selector } from "recoil";
+import { atom } from "recoil";
 
-const DEFAULT_MINUTES = 25;
-const DEFAULT_SECONDS = 0;
+export const DEFAULT_MINUTE = 25;
+export const DEFAULT_SECOND = 0;
 
-export enum DefaultTime {
-  "MINUTES" = 25,
-  "SECONDS" = 0,
-}
+export const minuteAtom = atom({
+  key: "minute",
+  default: DEFAULT_MINUTE,
+});
 
-export interface ITimer {
-  minutes: number;
-  seconds: number;
-}
-
-export const timerAtom = atom<ITimer>({
-  key: "timer",
-  default: { minutes: DefaultTime.MINUTES, seconds: DefaultTime.SECONDS },
+export const secondAtom = atom({
+  key: "second",
+  default: DEFAULT_SECOND,
 });

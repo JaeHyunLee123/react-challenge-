@@ -1,48 +1,49 @@
-import { useState } from "react";
-import { useRecoilState } from "recoil";
-import { timerAtom, DefaultTime, ITimer } from "./atoms";
+import { useState, useEffect } from "react";
+import { DefaultValue, useRecoilState } from "recoil";
+import {
+  DEFAULT_MINUTE,
+  DEFAULT_SECOND,
+  minuteAtom,
+  secondAtom,
+} from "./atoms";
 
 export default function App() {
+  const [intervalId, setIntervalId] = useState<number | null>(null);
   const [isPaused, setIsPuased] = useState(true);
-  const [timer, setTimer] = useRecoilState(timerAtom);
+  const [minute, setMinute] = useRecoilState(minuteAtom);
+  const [second, setSecond] = useRecoilState(secondAtom);
 
-  const toggleTimer = () => setIsPuased((prev) => !prev);
+  const toggleTimer = () => {
+    if (isPaused) {
+      const id = window.setInterval(() => {
+        reduceOneSecond();
+      }, 1000);
+      setIntervalId(id);
+    } else {
+      if (intervalId) clearInterval(intervalId);
+    }
+    setIsPuased((prev) => !prev);
+  };
 
   const reduceOneSecond = () => {
-    if (timer.minutes === 0 && timer.seconds === 0) {
+    if (minute === 0 && second === 0) {
       setIsPuased(true);
-      const initTimer: ITimer = {
-        minutes: DefaultTime.MINUTES,
-        seconds: DefaultTime.SECONDS,
-      };
-      setTimer(initTimer);
-    } else if (timer.seconds === 0) {
-      setTimer((current) => {
-        const reducedMinute = current.minutes - 1;
-        const newTimer: ITimer = {
-          minutes: reducedMinute,
-          seconds: 59,
-        };
-        return newTimer;
-      });
+      setMinute(DEFAULT_MINUTE);
+      setSecond(DEFAULT_SECOND);
+    } else if (second === 0) {
+      setMinute((prev) => prev - 1);
+      setSecond(59);
     } else {
-      setTimer((current) => {
-        const reducedSecond = current.seconds - 1;
-        const newTimer: ITimer = {
-          minutes: current.minutes,
-          seconds: reducedSecond,
-        };
-        return newTimer;
-      });
+      setSecond((prev) => prev - 1);
     }
   };
 
   return (
     <>
       <h1>Pomodoro</h1>
-      <span>{String(timer.minutes).padStart(2, "0")}</span>
+      <span>{String(minute).padStart(2, "0")}</span>
       <span>:</span>
-      <span>{String(timer.seconds).padStart(2, "0")}</span>
+      <span>{String(second).padStart(2, "0")}</span>
       <hr />
       <button onClick={toggleTimer}>{isPaused ? "start" : "paused"}</button>
       <hr />
