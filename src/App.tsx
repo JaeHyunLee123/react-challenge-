@@ -1,49 +1,36 @@
-import { useState, useEffect } from "react";
-import { DefaultValue, useRecoilState } from "recoil";
-import {
-  DEFAULT_MINUTE,
-  DEFAULT_SECOND,
-  minuteAtom,
-  secondAtom,
-} from "./atoms";
+import { useState } from "react";
+import { useRecoilState } from "recoil";
+import { DEFAULT_TIME, timeAtom } from "./atoms";
 
 export default function App() {
   const [intervalId, setIntervalId] = useState<number | null>(null);
-  const [isPaused, setIsPuased] = useState(true);
-  const [minute, setMinute] = useRecoilState(minuteAtom);
-  const [second, setSecond] = useRecoilState(secondAtom);
+  const [isPaused, setIsPaused] = useState(true);
+  const [time, setTime] = useRecoilState(timeAtom);
 
   const toggleTimer = () => {
     if (isPaused) {
       const id = window.setInterval(() => {
-        reduceOneSecond();
+        setTime((prev) => prev - 1);
       }, 1000);
       setIntervalId(id);
     } else {
-      if (intervalId) clearInterval(intervalId);
+      if (intervalId) {
+        clearInterval(intervalId);
+        setIntervalId(null);
+      }
     }
-    setIsPuased((prev) => !prev);
+    setIsPaused((prev) => !prev);
   };
 
-  const reduceOneSecond = () => {
-    if (minute === 0 && second === 0) {
-      setIsPuased(true);
-      setMinute(DEFAULT_MINUTE);
-      setSecond(DEFAULT_SECOND);
-    } else if (second === 0) {
-      setMinute((prev) => prev - 1);
-      setSecond(59);
-    } else {
-      setSecond((prev) => prev - 1);
-    }
-  };
+  const getMinutes = (time: number) => Math.floor(time / 60);
+  const getSeconds = (time: number) => time % 60;
 
   return (
     <>
       <h1>Pomodoro</h1>
-      <span>{String(minute).padStart(2, "0")}</span>
+      <span>{String(getMinutes(time)).padStart(2, "0")}</span>
       <span>:</span>
-      <span>{String(second).padStart(2, "0")}</span>
+      <span>{String(getSeconds(time)).padStart(2, "0")}</span>
       <hr />
       <button onClick={toggleTimer}>{isPaused ? "start" : "paused"}</button>
       <hr />
