@@ -1,5 +1,5 @@
 import { createGlobalStyle } from "styled-components";
-import Pomodoro from "./pomodoro";
+import Pomodoro from "./Pomodoro";
 
 const GlobalStyle = createGlobalStyle`
 html, body, div, span, applet, object, iframe,
