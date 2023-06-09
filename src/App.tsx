@@ -1,10 +1,15 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRecoilState } from "recoil";
 import { DEFAULT_TIME, timeAtom } from "./atoms";
+
+const TOTAL_ROUND = 4;
+const TOTAL_GOAL = 12;
 
 export default function App() {
   const [intervalId, setIntervalId] = useState<number | null>(null);
   const [isPaused, setIsPaused] = useState(true);
+  const [round, setRound] = useState(0);
+  const [goal, setGoal] = useState(0);
   const [time, setTime] = useRecoilState(timeAtom);
 
   const toggleTimer = () => {
@@ -22,6 +27,31 @@ export default function App() {
     setIsPaused((prev) => !prev);
   };
 
+  useEffect(() => {
+    if (time === 0) {
+      if (intervalId) {
+        clearInterval(intervalId);
+        setIntervalId(null);
+      }
+      setIsPaused(true);
+      setTime(DEFAULT_TIME);
+      setRound((prev) => prev + 1);
+    }
+  }, [time]);
+
+  useEffect(() => {
+    if (round === TOTAL_ROUND) {
+      setRound(0);
+      setGoal((prev) => prev + 1);
+    }
+  }, [round]);
+
+  useEffect(() => {
+    if (goal === TOTAL_GOAL) {
+      setGoal(0);
+    }
+  }, [goal]);
+
   const getMinutes = (time: number) => Math.floor(time / 60);
   const getSeconds = (time: number) => time % 60;
 
@@ -34,10 +64,10 @@ export default function App() {
       <hr />
       <button onClick={toggleTimer}>{isPaused ? "start" : "paused"}</button>
       <hr />
-      <span>0/4</span>
+      <span>{`${round}/${TOTAL_ROUND}`}</span>
       <span>ROUND</span>
       <hr />
-      <span>0/12</span>
+      <span>{`${goal}/${TOTAL_GOAL}`}</span>
       <span>GOAL</span>
     </>
   );
