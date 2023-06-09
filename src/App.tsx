@@ -1,74 +1,64 @@
-import { useState, useEffect } from "react";
-import { useRecoilState } from "recoil";
-import { DEFAULT_TIME, timeAtom } from "./atoms";
+import { createGlobalStyle } from "styled-components";
+import Pomodoro from "./pomodoro";
 
-const TOTAL_ROUND = 4;
-const TOTAL_GOAL = 12;
+const GlobalStyle = createGlobalStyle`
+html, body, div, span, applet, object, iframe,
+h1, h2, h3, h4, h5, h6, p, blockquote, pre,
+a, abbr, acronym, address, big, cite, code,
+del, dfn, em, img, ins, kbd, q, s, samp,
+small, strike, strong, sub, sup, tt, var,
+b, u, i, center,
+dl, dt, dd, menu, ol, ul, li,
+fieldset, form, label, legend,
+table, caption, tbody, tfoot, thead, tr, th, td,
+article, aside, canvas, details, embed,
+figure, figcaption, footer, header, hgroup,
+main, menu, nav, output, ruby, section, summary,
+time, mark, audio, video {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  font-size: 100%;
+  font: inherit;
+  vertical-align: baseline;
+}
+/* HTML5 display-role reset for older browsers */
+article, aside, details, figcaption, figure,
+footer, header, hgroup, main, menu, nav, section {
+  display: block;
+}
+/* HTML5 hidden-attribute fix for newer browsers */
+*[hidden] {
+    display: none;
+}
+body {
+  line-height: 1;
+}
+menu, ol, ul {
+  list-style: none;
+}
+blockquote, q {
+  quotes: none;
+}
+blockquote:before, blockquote:after,
+q:before, q:after {
+  content: '';
+  content: none;
+}
+table {
+  border-collapse: collapse;
+  border-spacing: 0;
+}
+a{
+  text-decoration: none;
+  color:inherit;}
+`;
 
 export default function App() {
-  const [intervalId, setIntervalId] = useState<number | null>(null);
-  const [isPaused, setIsPaused] = useState(true);
-  const [round, setRound] = useState(0);
-  const [goal, setGoal] = useState(0);
-  const [time, setTime] = useRecoilState(timeAtom);
-
-  const toggleTimer = () => {
-    if (isPaused) {
-      const id = window.setInterval(() => {
-        setTime((prev) => prev - 1);
-      }, 1000);
-      setIntervalId(id);
-    } else {
-      if (intervalId) {
-        clearInterval(intervalId);
-        setIntervalId(null);
-      }
-    }
-    setIsPaused((prev) => !prev);
-  };
-
-  useEffect(() => {
-    if (time === 0) {
-      if (intervalId) {
-        clearInterval(intervalId);
-        setIntervalId(null);
-      }
-      setIsPaused(true);
-      setTime(DEFAULT_TIME);
-      setRound((prev) => prev + 1);
-    }
-  }, [time]);
-
-  useEffect(() => {
-    if (round === TOTAL_ROUND) {
-      setRound(0);
-      setGoal((prev) => prev + 1);
-    }
-  }, [round]);
-
-  useEffect(() => {
-    if (goal === TOTAL_GOAL) {
-      setGoal(0);
-    }
-  }, [goal]);
-
-  const getMinutes = (time: number) => Math.floor(time / 60);
-  const getSeconds = (time: number) => time % 60;
-
   return (
     <>
-      <h1>Pomodoro</h1>
-      <span>{String(getMinutes(time)).padStart(2, "0")}</span>
-      <span>:</span>
-      <span>{String(getSeconds(time)).padStart(2, "0")}</span>
-      <hr />
-      <button onClick={toggleTimer}>{isPaused ? "start" : "paused"}</button>
-      <hr />
-      <span>{`${round}/${TOTAL_ROUND}`}</span>
-      <span>ROUND</span>
-      <hr />
-      <span>{`${goal}/${TOTAL_GOAL}`}</span>
-      <span>GOAL</span>
+      <GlobalStyle />
+      <Pomodoro />
     </>
   );
 }
