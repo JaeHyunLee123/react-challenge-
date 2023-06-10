@@ -1,6 +1,6 @@
 import { atom } from "recoil";
 
-export const DEFAULT_TIME = 2;
+export const DEFAULT_TIME = 25 * 60;
 
 export const timeAtom = atom({
   key: "pomodorotime",

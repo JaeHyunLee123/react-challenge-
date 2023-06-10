@@ -1,10 +1,16 @@
 import { useState, useEffect } from "react";
 import { useRecoilState } from "recoil";
 import { DEFAULT_TIME, timeAtom } from "./atoms";
+import { motion, useMotionValue, useMotionValueEvent } from "framer-motion";
 import styled from "styled-components";
 
 const TOTAL_ROUND = 4;
 const TOTAL_GOAL = 12;
+
+const PLAY_SVG_PATH_D =
+  "M2 10a8 8 0 1116 0 8 8 0 01-16 0zm6.39-2.908a.75.75 0 01.766.027l3.5 2.25a.75.75 0 010 1.262l-3.5 2.25A.75.75 0 018 12.25v-4.5a.75.75 0 01.39-.658z";
+const PAUSED_SVG_PATH_D =
+  "M2 10a8 8 0 1116 0 8 8 0 01-16 0zm5-2.25A.75.75 0 017.75 7h.5a.75.75 0 01.75.75v4.5a.75.75 0 01-.75.75h-.5a.75.75 0 01-.75-.75v-4.5zm4 0a.75.75 0 01.75-.75h.5a.75.75 0 01.75.75v4.5a.75.75 0 01-.75.75h-.5a.75.75 0 01-.75-.75v-4.5z";
 
 const FlexColumnWrapper = styled.div`
   display: flex;
@@ -13,7 +19,7 @@ const FlexColumnWrapper = styled.div`
   align-items: center;
 `;
 
-const FlexRowWrapper = styled.div`
+const FlexRowWrapper = styled(motion.div)`
   display: flex;
   flex-direction: row;
   justify-content: center;
@@ -74,9 +80,10 @@ const RoundAndGoal = styled(FlexColumnWrapper)`
   }
 `;
 
-const Svg = styled.svg`
+const Svg = styled(motion.svg)`
   width: 100px;
   height: 100px;
+  border: 0px;
 `;
 
 export default function Pomodoro() {
@@ -85,6 +92,9 @@ export default function Pomodoro() {
   const [round, setRound] = useState(0);
   const [goal, setGoal] = useState(0);
   const [time, setTime] = useRecoilState(timeAtom);
+
+  const getMinutes = (time: number) => Math.floor(time / 60);
+  const getSeconds = (time: number) => time % 60;
 
   const toggleTimer = () => {
     if (isPaused) {
@@ -126,9 +136,6 @@ export default function Pomodoro() {
     }
   }, [goal]);
 
-  const getMinutes = (time: number) => Math.floor(time / 60);
-  const getSeconds = (time: number) => time % 60;
-
   return (
     <WholeWrapper>
       <Title>Pomodoro</Title>
@@ -145,35 +152,23 @@ export default function Pomodoro() {
         </Time>
       </TimeWrapper>
 
-      {isPaused ? (
-        <Svg
-          onClick={toggleTimer}
-          fill="currentColor"
-          viewBox="0 0 20 20"
-          xmlns="http://www.w3.org/2000/svg"
-          aria-hidden="true"
-        >
-          <path
-            clip-rule="evenodd"
-            fill-rule="evenodd"
-            d="M2 10a8 8 0 1116 0 8 8 0 01-16 0zm6.39-2.908a.75.75 0 01.766.027l3.5 2.25a.75.75 0 010 1.262l-3.5 2.25A.75.75 0 018 12.25v-4.5a.75.75 0 01.39-.658z"
-          ></path>
-        </Svg>
-      ) : (
-        <Svg
-          onClick={toggleTimer}
-          fill="currentColor"
-          viewBox="0 0 20 20"
-          xmlns="http://www.w3.org/2000/svg"
-          aria-hidden="true"
-        >
-          <path
-            clip-rule="evenodd"
-            fill-rule="evenodd"
-            d="M2 10a8 8 0 1116 0 8 8 0 01-16 0zm5-2.25A.75.75 0 017.75 7h.5a.75.75 0 01.75.75v4.5a.75.75 0 01-.75.75h-.5a.75.75 0 01-.75-.75v-4.5zm4 0a.75.75 0 01.75-.75h.5a.75.75 0 01.75.75v4.5a.75.75 0 01-.75.75h-.5a.75.75 0 01-.75-.75v-4.5z"
-          ></path>
-        </Svg>
-      )}
+      <Svg
+        onClick={toggleTimer}
+        whileHover={{
+          scale: 1.2,
+        }}
+        whileTap={{ scale: 0.9 }}
+        fill="currentColor"
+        viewBox="0 0 20 20"
+        xmlns="http://www.w3.org/2000/svg"
+        aria-hidden="true"
+      >
+        <motion.path
+          clipRule="evenodd"
+          fillRule="evenodd"
+          d={isPaused ? PLAY_SVG_PATH_D : PAUSED_SVG_PATH_D}
+        ></motion.path>
+      </Svg>
 
       <FlexRowWrapper>
         <RoundAndGoal>
