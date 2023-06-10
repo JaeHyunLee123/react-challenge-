@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useRecoilState } from "recoil";
 import { DEFAULT_TIME, timeAtom } from "./atoms";
-import { motion, useMotionValue, useMotionValueEvent } from "framer-motion";
+import { motion, useAnimation } from "framer-motion";
 import styled from "styled-components";
 
 const TOTAL_ROUND = 4;
@@ -61,8 +61,8 @@ const Colon = styled(FlexColumnWrapper)`
   padding: 0;
   margin: 0px 5px;
   div {
-    width: 25px;
-    height: 25px;
+    width: 20px;
+    height: 20px;
     border-radius: 50%;
     background-color: #fac1bb;
     margin: 10px 0px;
@@ -87,14 +87,17 @@ const Svg = styled(motion.svg)`
 `;
 
 export default function Pomodoro() {
+  const getMinutes = (time: number) => Math.floor(time / 60);
+  const getSeconds = (time: number) => time % 60;
+
   const [intervalId, setIntervalId] = useState<number | null>(null);
   const [isPaused, setIsPaused] = useState(true);
   const [round, setRound] = useState(0);
   const [goal, setGoal] = useState(0);
   const [time, setTime] = useRecoilState(timeAtom);
 
-  const getMinutes = (time: number) => Math.floor(time / 60);
-  const getSeconds = (time: number) => time % 60;
+  const minuteAnimationControls = useAnimation();
+  const secondAnimationControls = useAnimation();
 
   const toggleTimer = () => {
     if (isPaused) {
@@ -121,6 +124,24 @@ export default function Pomodoro() {
       setTime(DEFAULT_TIME);
       setRound((prev) => prev + 1);
     }
+
+    secondAnimationControls
+      .start({
+        scale: 0.9,
+        opacity: 0.5,
+      })
+      .then(() =>
+        secondAnimationControls.start({
+          scale: 1,
+          opacity: 1,
+        })
+      );
+
+    if (getSeconds(time) === 59) {
+      minuteAnimationControls
+        .start({ scale: 0.9, opacity: 0.5 })
+        .then(() => minuteAnimationControls.start({ scale: 1, opacity: 1 }));
+    }
   }, [time]);
 
   useEffect(() => {
@@ -140,34 +161,34 @@ export default function Pomodoro() {
     <WholeWrapper>
       <Title>Pomodoro</Title>
       <TimeWrapper>
-        <Time>
-          <span>{String(getMinutes(time)).padStart(2, "0")}</span>
+        <Time animate={minuteAnimationControls}>
+          <motion.span>{String(getMinutes(time)).padStart(2, "0")}</motion.span>
         </Time>
         <Colon>
           <div />
           <div />
         </Colon>
-        <Time>
-          <span>{String(getSeconds(time)).padStart(2, "0")}</span>
+        <Time animate={secondAnimationControls}>
+          <motion.span>{String(getSeconds(time)).padStart(2, "0")}</motion.span>
         </Time>
       </TimeWrapper>
 
       <Svg
-        onClick={toggleTimer}
         whileHover={{
           scale: 1.2,
         }}
         whileTap={{ scale: 0.9 }}
+        onClick={toggleTimer}
         fill="currentColor"
         viewBox="0 0 20 20"
         xmlns="http://www.w3.org/2000/svg"
         aria-hidden="true"
       >
-        <motion.path
+        <path
           clipRule="evenodd"
           fillRule="evenodd"
           d={isPaused ? PLAY_SVG_PATH_D : PAUSED_SVG_PATH_D}
-        ></motion.path>
+        ></path>
       </Svg>
 
       <FlexRowWrapper>
